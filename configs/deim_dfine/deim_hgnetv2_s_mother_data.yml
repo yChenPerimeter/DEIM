@@ -1,0 +1,55 @@
+__include__:
+  - ../base/dataloader.yml
+  - ../base/dfine_hgnetv2.yml
+  - ../base/optimizer.yml
+  - ../base/deim.yml
+  - ../dataset/mother_data_detection.yml
+  - ../runtime.yml
+
+# Model configuration
+num_classes: 2  # DCIS and IDC
+
+# Override model name
+model:
+  name: hgnetv2_s
+
+# Override backbone pretrained path if needed
+# pretrained: null
+
+# Training settings
+epochs: 150  # You can adjust based on dataset size
+start_epoch: 0
+
+# Override batch size for smaller dataset
+train_dataloader:
+  total_batch_size: 16  # Reduce if GPU memory limited
+  batch_size_per_gpu: 4  # Adjust based on GPU count
+
+val_dataloader:
+  total_batch_size: 16
+  batch_size_per_gpu: 4
+
+# Learning rate adjustments for smaller dataset
+lr: 0.0001  # Lower LR for fine-tuning
+lr_warmup_ratio: 0.001
+
+# Evaluation settings
+eval_spatial_size: [1024, 1024]  # Adjust based on your image sizes
+
+# Save settings
+checkpoint_dir: ./outputs/mother_data/
+save_checkpoint_interval: 10
+eval_during_training: True
+eval_interval: 5
+
+# Early stopping (optional)
+# early_stop_patience: 20
+
+# Mixed precision training
+use_amp: True
+
+# Logging
+print_freq: 20
+summary_writer:
+  enabled: True
+  log_dir: ./outputs/mother_data/logs/
