@@ -88,25 +88,47 @@ python -c "import json; print(len(json.load(open('/home/ychen/Documents/project/
 
 ## Training
 
-### Option 1: Train DEIM-D-FINE Model (Recommended)
+### Option 1: Train DEIM-D-FINE Model from Scratch
 
 For single GPU:
 ```bash
+cd /home/ychen/Documents/project/DEIM
 python train.py -c configs/deim_dfine/deim_hgnetv2_s_mother_data.yml --use-amp --seed=0
 ```
 
 For multi-GPU (4 GPUs):
 ```bash
+cd /home/ychen/Documents/project/DEIM
 CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 \
     train.py -c configs/deim_dfine/deim_hgnetv2_s_mother_data.yml --use-amp --seed=0
 ```
 
-### Option 2: Fine-tune from Pre-trained Model
+### Option 2: Fine-tune from Pre-trained Model (Recommended for Better Performance)
 
-If you have a pre-trained DEIM model:
+Using HGNetv2-L pretrained model:
 ```bash
-python train.py -c configs/deim_dfine/deim_hgnetv2_s_mother_data.yml \
-    --use-amp --seed=0 -t path/to/pretrained.pth
+cd /home/ychen/Documents/project/DEIM
+python train.py -c configs/deim_dfine/deim_hgnetv2_l_mother_data.yml \
+    --use-amp --seed=0 \
+    -t /home/ychen/Documents/project/DEIM/downloads/pretrained/deim_dfine/deim_dfine_hgnetv2_l_coco_50e.pth
+```
+
+Or with custom Python environment:
+```bash
+cd /home/ychen/Documents/project/DEIM
+/home/ychen/Documents/project/torchENV_py312/bin/python train.py \
+    -c configs/deim_dfine/deim_hgnetv2_l_mother_data_v2.yml \
+    --use-amp --seed=0 \
+    -t /home/ychen/Documents/project/DEIM/downloads/pretrained/deim_dfine/deim_dfine_hgnetv2_l_coco_50e.pth
+```
+
+For multi-GPU training with pretrained model:
+```bash
+cd /home/ychen/Documents/project/DEIM
+CUDA_VISIBLE_DEVICES=0,1 torchrun --master_port=7777 --nproc_per_node=2 \
+    train.py -c configs/deim_dfine/deim_hgnetv2_l_mother_data.yml \
+    --use-amp --seed=0 \
+    -t /home/ychen/Documents/project/DEIM/downloads/pretrained/deim_dfine/deim_dfine_hgnetv2_l_coco_50e.pth
 ```
 
 ## Model Sizes
@@ -175,6 +197,8 @@ trtexec --onnx="outputs/mother_data/model.onnx" \
 1. **Out of Memory**: Reduce batch size in the config file
 2. **Dataset not found**: Ensure you ran the YOLO to COCO conversion
 3. **Low accuracy**: Try training for more epochs or using a larger model
+4. **Config parameter issues**: Note that DEIM uses `epoches` (with typo) instead of `epochs` in config files. This is consistent throughout the codebase
+5. **Training doesn't start**: Make sure the dataset paths in the config files point to existing directories with valid COCO format annotations
 
 ## Dataset Classes
 
@@ -188,3 +212,19 @@ Your dataset contains 2 classes:
 - Checkpoints are saved every 10 epochs
 - Evaluation runs every 5 epochs during training
 - Training logs are saved to `outputs/mother_data/logs/`
+
+## configed training (Chinese version)
+单GPU训练：
+  cd /home/ychen/Documents/project/DEIM
+  python train.py -c configs/deim_dfine/deim_hgnetv2_s_mother_data.yml --use-amp --seed=0
+
+  多GPU训练（如4个GPU）：
+  cd /home/ychen/Documents/project/DEIM
+  CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 \
+      train.py -c configs/deim_dfine/deim_hgnetv2_s_mother_data.yml --use-amp --seed=0
+
+  主要更改：
+  - 训练图像路径：/home/ychen/Documents/project/mother_data/deim_coco_format/train
+  - 训练标注路径：/home/ychen/Documents/project/mother_data/deim_coco_format/annotations/train.json
+  - 验证图像路径：/home/ychen/Documents/project/mother_data/deim_coco_format/val
+  - 验证标注路径：/home/ychen/Documents/project/mother_data/deim_coco_format/annotations/val.json

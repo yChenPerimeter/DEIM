@@ -11,8 +11,8 @@ train_dataloader:
   type: DataLoader
   dataset:
     type: CocoDetection
-    img_folder: /home/ychen/Documents/project/mother_data/coco_format/train
-    ann_file: /home/ychen/Documents/project/mother_data/coco_format/annotations/train.json
+    img_folder: /home/ychen/Documents/project/mother_data/deim_coco_format/train
+    ann_file: /home/ychen/Documents/project/mother_data/deim_coco_format/annotations/train.json
     return_masks: False
     transforms:
       type: Compose
@@ -28,8 +28,8 @@ val_dataloader:
   type: DataLoader
   dataset:
     type: CocoDetection
-    img_folder: /home/ychen/Documents/project/mother_data/coco_format/val
-    ann_file: /home/ychen/Documents/project/mother_data/coco_format/annotations/val.json
+    img_folder: /home/ychen/Documents/project/mother_data/deim_coco_format/val
+    ann_file: /home/ychen/Documents/project/mother_data/deim_coco_format/annotations/val.json
     return_masks: False
     transforms:
       type: Compose

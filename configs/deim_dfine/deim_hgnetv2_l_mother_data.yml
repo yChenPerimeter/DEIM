@@ -1,0 +1,81 @@
+__include__:
+  - ../base/dataloader.yml
+  - ../base/dfine_hgnetv2.yml
+  - ../base/optimizer.yml
+  - ../base/deim.yml
+  - ../dataset/mother_data_detection.yml
+  - ../runtime.yml
+
+# Model configuration
+num_classes: 2  # DCIS and IDC
+
+# Configure HGNetv2 backbone for large variant
+HGNetv2:
+  name: 'B4'  # Large variant
+  return_idx: [1, 2, 3]
+  freeze_stem_only: True
+  freeze_at: 0
+  freeze_norm: True
+  use_lab: True
+
+# Encoder and decoder use default configs from base
+
+# Training settings for fine-tuning from pretrained
+epoches: 30  # Reduced when using pretrained model
+start_epoch: 0
+
+# Override batch size for larger model (may need to reduce for GPU memory)
+train_dataloader:
+  total_batch_size: 8  # Reduced for larger model
+
+val_dataloader:
+  total_batch_size: 8
+
+# Optimizer configuration for large model
+optimizer:
+  type: AdamW
+  params:
+    - 
+      params: '^(?=.*backbone)(?!.*norm|bn).*$'
+      lr: 0.0000125  # Lower LR for large model
+    - 
+      params: '^(?=.*(?:encoder|decoder))(?=.*(?:norm|bn)).*$'
+      weight_decay: 0.
+  lr: 0.00025
+  betas: [0.9, 0.999]
+  weight_decay: 0.000125
+
+# LR scheduler adjustments for fine-tuning
+flat_epoch: 15    # Adjusted for 30 epochs with pretrained
+no_aug_epoch: 4
+
+# Data augmentation policy (more conservative for fine-tuning)
+train_dataloader: 
+  dataset: 
+    transforms:
+      policy:
+        epoch: [2, 15, 25]   # Adjusted for 30 epochs
+  collate_fn:
+    mixup_epochs: [2, 15]
+    stop_epoch: 25
+    base_size_repeat: 4
+
+# Evaluation settings
+eval_spatial_size: [1024, 1024]  # Can increase if GPU memory allows
+
+# Save settings
+checkpoint_dir: ./outputs/mother_data_l_pretrained/
+save_checkpoint_interval: 5  # More frequent for shorter training
+checkpoint_freq: 3  # Save every 3 epochs
+eval_during_training: True
+eval_interval: 2  # Evaluate every 2 epochs
+
+# Mixed precision training
+use_amp: True
+
+# Logging
+print_freq: 20
+output_dir: ./outputs/deim_hgnetv2_l_mother_data_pretrained
+summary_writer:
+  enabled: True
+  log_dir: ./outputs/mother_data_l_pretrained/logs/
