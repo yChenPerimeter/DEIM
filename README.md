@@ -447,3 +447,17 @@ If you use `DEIM` or its methods in your work, please cite the following BibTeX 
 Our work is built upon [D-FINE](https://github.com/Peterande/D-FINE) and [RT-DETR](https://github.com/lyuwenyu/RT-DETR).
 
 ✨ Feel free to contribute and reach out if you have any questions! ✨
+
+## Knownissue (Analysised by Youwei)
+## ⚠️ Known Issues
+
+**TorchVision v2 Compatibility**
+
+DEIM is currently **incompatible** with `torchvision` v2.0 and later due to breaking changes in its transform methods.
+
+- **Error Cause**: `torchvision` v2 transforms use an abstract `transform()` method that DEIM cannot use directly, leading to an error.
+- **Solution**: Please install a `torchvision` version older than v2.0. You can do this by running:Shell
+    
+    `pip install "torchvision<2.0"
+    # For example:
+    # pip install torchvision==0.17.2`
