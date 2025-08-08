@@ -246,7 +246,54 @@ To train on your custom dataset, you need to organize it in the COCO format. Fol
 
 
 ## 3. Usage
+
+> 📚 **For detailed training instructions, see [TRAINING_GUIDE.md](TRAINING_GUIDE.md)**
+
+### 🔥 Quick Training with Mother Data
+
 <details open>
+<summary> Training on Mother Data (Medical Images) </summary>
+
+1. **Basic Training**
+```shell
+python train.py \
+  -c configs/deim_dfine/deim_hgnetv2_l_mother_data_v2.yml \
+  --use-amp --seed=0 \
+  -t downloads/pretrained/deim_dfine/deim_dfine_hgnetv2_l_coco_50e.pth
+```
+
+2. **Background Training (Recommended for long runs)**
+```shell
+# Use the provided nohup script for disconnection-safe training
+./train_nohup.sh
+
+# Monitor training progress
+./monitor_training.sh
+
+# View live logs
+tail -f logs/training_*.log
+```
+
+3. **GPU-Optimized Settings**
+```shell
+# For A100 40GB (batch size 16)
+python train.py \
+  -c configs/deim_dfine/deim_hgnetv2_l_mother_data_v2.yml \
+  --use-amp --seed=0 \
+  -t downloads/pretrained/deim_dfine/deim_dfine_hgnetv2_l_coco_50e.pth \
+  -u train_dataloader.total_batch_size=16
+
+# For A100 40GB (batch size 32 - aggressive)
+python train.py \
+  -c configs/deim_dfine/deim_hgnetv2_l_mother_data_v2.yml \
+  --use-amp --seed=0 \
+  -t downloads/pretrained/deim_dfine/deim_dfine_hgnetv2_l_coco_50e.pth \
+  -u train_dataloader.total_batch_size=32 val_dataloader.total_batch_size=32
+```
+
+</details>
+
+<details>
 <summary> COCO2017 </summary>
 
 1. Training
@@ -268,7 +315,34 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --master_port=7777 --nproc_per_node=4 trai
 </details>
 
 <details>
-<summary> Customizing Batch Size </summary>
+<summary> GPU Configuration & Batch Size Recommendations </summary>
+
+### Recommended Batch Sizes by GPU
+
+| GPU Model | VRAM | HGNetv2-S | HGNetv2-M | HGNetv2-L | HGNetv2-X |
+|-----------|------|-----------|-----------|-----------|-----------|
+| T4 | 16GB | 16 | 8 | 4-8 | 4 |
+| V100 | 32GB | 32 | 16 | 8-16 | 8 |
+| A100 | 40GB | 32-64 | 32 | 16-32 | 16 |
+| A100 | 80GB | 64-128 | 64 | 32-64 | 32 |
+
+### Dynamic Batch Size Override
+
+You can override batch size at runtime without modifying config files:
+```bash
+# Override training batch size only
+python train.py -c config.yml -u train_dataloader.total_batch_size=32
+
+# Override both training and validation batch sizes
+python train.py -c config.yml \
+  -u train_dataloader.total_batch_size=32 \
+  -u val_dataloader.total_batch_size=64
+```
+
+</details>
+
+<details>
+<summary> Customizing Batch Size in Config Files </summary>
 
 For example, if you want to double the total batch size when training D-FINE-L on COCO2017, here are the steps you should follow:
 
@@ -448,8 +522,7 @@ Our work is built upon [D-FINE](https://github.com/Peterande/D-FINE) and [RT-DET
 
 ✨ Feel free to contribute and reach out if you have any questions! ✨
 
-## Knownissue (Analysised by Youwei)
-## ⚠️ Known Issues
+## ⚠️ Known Issues (Analysised by Youwei)
 
 **TorchVision v2 Compatibility**
 
