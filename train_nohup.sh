@@ -29,7 +29,7 @@ nohup /home/ychen/Documents/project/torchENV_py312/bin/python train.py \
     --use-amp \
     --seed=0 \
     -t /home/ychen/Documents/project/DEIM/downloads/pretrained/deim_dfine/deim_dfine_hgnetv2_l_coco_50e.pth \
-    -u train_dataloader.total_batch_size=16 \
+    -u train_dataloader.total_batch_size=32 \
     > "$LOG_FILE" 2>&1 &
 
 # Save the process ID

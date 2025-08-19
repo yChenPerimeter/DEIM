@@ -70,8 +70,9 @@ class DetSolver(BaseSolver):
 
             if epoch == self.train_dataloader.collate_fn.stop_epoch:
                 self.load_resume_state(str(self.output_dir / 'best_stg1.pth'))
-                self.ema.decay = self.train_dataloader.collate_fn.ema_restart_decay
-                print(f'Refresh EMA at epoch {epoch} with decay {self.ema.decay}')
+                if self.ema:
+                    self.ema.decay = self.train_dataloader.collate_fn.ema_restart_decay
+                    print(f'Refresh EMA at epoch {epoch} with decay {self.ema.decay}')
 
             train_stats = train_one_epoch(
                 self.self_lr_scheduler,
@@ -150,9 +151,11 @@ class DetSolver(BaseSolver):
 
                 elif epoch >= self.train_dataloader.collate_fn.stop_epoch:
                     best_stat = {'epoch': -1, }
-                    self.ema.decay -= 0.0001
+                    if self.ema:
+                        self.ema.decay -= 0.0001
                     self.load_resume_state(str(self.output_dir / 'best_stg1.pth'))
-                    print(f'Refresh EMA at epoch {epoch} with decay {self.ema.decay}')
+                    if self.ema:
+                        print(f'Refresh EMA at epoch {epoch} with decay {self.ema.decay}')
 
 
             log_stats = {
